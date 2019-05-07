@@ -4,7 +4,6 @@ const user = 'Sam'
 document.addEventListener('DOMContentLoaded', () => {
   renderUser()
 });
-let br = document.createElement('br')
 
 function clearDOM(){
   let body = document.querySelector('body')
@@ -12,8 +11,6 @@ function clearDOM(){
 }
 
 // For "signed in" user:
-//  searching for a keyword returns buttons with stock names
-//  buttons have event listeners for clicks
 //  clicking a button will render relevant info about stock
 //  user will have option to make purchase of shares
 
@@ -21,7 +18,21 @@ function clearDOM(){
 // Need Sign In Page - find or create user
 // user name stored in global variable
 //
-// 
+// User HomePage:
+// Find good stylesheet from semantic?
+// Add navbar to permanent location in DOM
+//    Items on Navbar:
+//    'User History' - Purchase/Sale history in table with 20 cells.
+//        purchase shows stock name, quantity, stock price, and total purchase cost
+//        sale shows stock name, quantity, stock price, net gain on purchase/sale?
+//    'User Portfolio' - Table of stocks user has invested in
+//        show total portfolio value
+//        table values: stock name/symbol(clickable), quantity owned, current stock value/total value
+//        show graph of portfolio history? (How are we keeping track of history?)
+//    'Search Bar' - Search for stock. Renders table of results with name,symbol,...
+//    'Logout' - erases current user and rerenders app homescreen(loginscreen)
+//    'edit funds'? (maybe edit user info?)
+
 
 function renderUser(user){
   let div = document.createElement('div')
