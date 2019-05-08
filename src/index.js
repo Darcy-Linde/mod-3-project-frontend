@@ -10,6 +10,37 @@ function clearDOM(){
   body.innerHTML = ""
 }
 
+function renderNavbar(){
+  let menu = document.createElement('div')
+  menu.className = 'ui top attached menu'
+
+  // searchbar (remove form and reinstate search icon)
+  let menuSearch = document.createElement('div')
+  menuSearch.className = 'ui right aligned category search item'
+  let form = document.createElement('form')
+  let input = document.createElement('input')
+  input.type = "text"
+  input.name = 'input'
+  input.placeholder = 'Search Companies...'
+  let i = document.createElement('input')
+  i.className = 'search link icon'
+  i.type = 'submit'
+  form.addEventListener('submit', handleSubmit)
+
+  // logout (needs event listener)
+  let logout = document.createElement('a')
+  logout.className = 'ui item'
+  logout.innerText = 'Logout'
+
+  //appending all items to DOM
+  document.querySelector('body').appendChild(menu)
+  menu.appendChild(menuSearch)
+  menu.appendChild(logout)
+  menuSearch.appendChild(form)
+  form.appendChild(input)
+  form.appendChild(i)
+}
+
 // For "signed in" user:
 //  clicking a button will render relevant info about stock
 //  user will have option to make purchase of shares
@@ -19,51 +50,34 @@ function clearDOM(){
 // user name stored in global variable
 //
 // User HomePage:
-// Find good stylesheet from semantic?
-// Add navbar to permanent location in DOM
 //    Items on Navbar:
-//    'User History' - Purchase/Sale history in table with 20 cells.
+//    'Transaction History' - Purchase/Sale history in table with 20 cells.
 //        purchase shows stock name, quantity, stock price, and total purchase cost
 //        sale shows stock name, quantity, stock price, net gain on purchase/sale?
-//    'User Portfolio' - Table of stocks user has invested in
+//    'My Portfolio' - Table of stocks user has invested in
 //        show total portfolio value
 //        table values: stock name/symbol(clickable), quantity owned, current stock value/total value
 //        show graph of portfolio history? (How are we keeping track of history?)
-//    'Search Bar' - Search for stock. Renders table of results with name,symbol,...
+//    'Search Bar' - Renders table of results with name,symbol,...
 //    'Logout' - erases current user and rerenders app homescreen(loginscreen)
 //    'edit funds'? (maybe edit user info?)
 
 
 function renderUser(user){
+  renderNavbar()
   let div = document.createElement('div')
-  div.className = "user-card"
-
-  let form = document.createElement('form')
-  form.innerText = "Search for company by name or symbol"
-  let input = document.createElement('input')
-  input.type = "text"
-  input.name = "search"
-  input.placeholder = "Search"
-
-  let submit = document.createElement('input')
-  submit.type = "submit"
-  submit.addEventListener('click', handleSubmit)
-
-  form.appendChild(input)
-  form.appendChild(submit)
-  div.appendChild(form)
+  div.className = 'page-body'
   document.querySelector('body').appendChild(div)
 }
 
 function handleSubmit(e){
   e.preventDefault()
-  let target = e.target.previousSibling.value
-  console.log(target)
+  let target = e.target.input.value
   const submitURL = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${target}&apikey=T8E6RZ7YEO1NDYZU`
   fetch(submitURL)
   .then((res) => res.json())
   .then((data) =>renderCompanies(data))
-  e.target.parentElement.reset()
+  e.target.reset()
 }
 
 
@@ -79,7 +93,7 @@ function renderCompanies(companies){
     button.addEventListener('click', stockClick)
     div.appendChild(button)
   })
-  document.querySelector('body').appendChild(div)
+  document.querySelector('.page-body').appendChild(div)
 }
 
 function stockClick(e){
