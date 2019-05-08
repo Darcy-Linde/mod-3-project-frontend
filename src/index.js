@@ -10,9 +10,23 @@ function clearDOM(){
   body.innerHTML = ""
 }
 
+function fetchCompanyImage(name){
+  return fetch(`https://api.ritekit.com/v1/images/logo?domain=${name}.com&client_id=97247b685aef64f97affbc136bc97d444e5c50af51c3`)
+}
+
 function renderNavbar(){
   let menu = document.createElement('div')
   menu.className = 'ui top attached menu'
+
+  // Transaction History
+  let history = document.createElement('a')
+  history.className = 'ui item'
+  history.innerText = 'Transaction History'
+
+  // Transaction History
+  let portfolio = document.createElement('a')
+  portfolio.className = 'ui item'
+  portfolio.innerText = 'My Portfolio'
 
   // searchbar (remove form and reinstate search icon)
   let menuSearch = document.createElement('div')
@@ -34,6 +48,8 @@ function renderNavbar(){
 
   //appending all items to DOM
   document.querySelector('body').appendChild(menu)
+  menu.appendChild(history)
+  menu.appendChild(portfolio)
   menu.appendChild(menuSearch)
   menu.appendChild(logout)
   menuSearch.appendChild(form)
@@ -65,9 +81,9 @@ function renderNavbar(){
 
 function renderUser(user){
   renderNavbar()
-  let div = document.createElement('div')
-  div.className = 'page-body'
-  document.querySelector('body').appendChild(div)
+  // let div = document.createElement('div')
+  // div.className = 'page-body'
+  // document.querySelector('body').appendChild(div)
 }
 
 function handleSubmit(e){
@@ -76,24 +92,73 @@ function handleSubmit(e){
   const submitURL = `https://www.alphavantage.co/query?function=SYMBOL_SEARCH&keywords=${target}&apikey=T8E6RZ7YEO1NDYZU`
   fetch(submitURL)
   .then((res) => res.json())
-  .then((data) =>renderCompanies(data))
+  .then((data) =>renderCompanies(data["bestMatches"]))
   e.target.reset()
 }
 
 
 function renderCompanies(companies){
-  let div = document.createElement('div')
-  div.className = "Companies"
-  companies["bestMatches"].forEach(company =>{
-    let button = document.createElement('button')
-    let symbol = company["1. symbol"]
-    let name = company["2. name"]
-    button.innerText = `Name: ${name} , Symbol: ${symbol}`
-    button.id = symbol
-    button.addEventListener('click', stockClick)
-    div.appendChild(button)
-  })
-  document.querySelector('.page-body').appendChild(div)
+  let table = document.createElement('table')
+  table.className = "ui celled striped table"
+  let thead = document.createElement('thead')
+  let tr = document.createElement('tr')
+  let th1 = document.createElement('th')
+  th1.innerText = 'Company'
+  let th2 = document.createElement('th')
+  th2.innerText = 'Daily Info'
+  let tbody = document.createElement('tbody')
+
+  document.querySelector('body').appendChild(table)
+  table.appendChild(thead)
+  thead.appendChild(tr)
+  tr.appendChild(th1)
+  tr.appendChild(th2)
+  table.appendChild(tbody)
+
+    companies.forEach(company => {
+      let symbol = company["1. symbol"]
+      let name = company["2. name"]
+
+      //create table
+      let tr = document.createElement('tr')
+      let td = document.createElement('td')
+      td.className = 'collapsing'
+      let h4 = document.createElement('h4')
+      let content = document.createElement('div')
+      content.className = 'content'
+      content.addEventListener('click', stockClick)
+      content.id = symbol
+      content.innerText = symbol
+      let subHeader = document.createElement('div')
+      subHeader.className = 'sub header'
+      subHeader.innerText = name
+
+      let td2 = document.createElement('td')
+      td2.innerText = '22'
+
+      //append all elements to table
+      tbody.appendChild(tr)
+      tr.appendChild(td)
+      tr.appendChild(td2)
+      td.appendChild(h4)
+      h4.appendChild(content)
+      content.appendChild(subHeader)
+
+    })
+
+  // document.querySelector(".page-body").innerHTML = ""
+  // let div = document.createElement('div')
+  // div.className = "Companies"
+  // companies["bestMatches"].forEach(company =>{
+  //   let button = document.createElement('button')
+  //   let symbol = company["1. symbol"]
+  //   let name = company["2. name"]
+  //   button.innerText = `Name: ${name} , Symbol: ${symbol}`
+  //   button.id = symbol
+  //   button.addEventListener('click', stockClick)
+  //   div.appendChild(button)
+  // })
+  // document.querySelector('.page-body').appendChild(div)
 }
 
 function stockClick(e){
