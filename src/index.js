@@ -1,6 +1,9 @@
 const usersURL = 'http://localhost:3000/users'
+const sharesURL = 'http://localhost:3000/shares'
 // const userURL = `http://localhost:3000/user/${id}`
-const user = 'Sam'
+let user = 'test_1'
+let userID = 1
+
 document.addEventListener('DOMContentLoaded', () => {
   renderUser()
 });
@@ -16,7 +19,7 @@ function fetchCompanyImage(name){
 
 function renderNavbar(){
   let menu = document.createElement('div')
-  menu.className = 'ui top attached menu'
+  menu.className = 'ui secondary menu'
 
   // Transaction History
   let history = document.createElement('a')
@@ -77,6 +80,9 @@ function renderNavbar(){
 //    'Search Bar' - Renders table of results with name,symbol,...
 //    'Logout' - erases current user and rerenders app homescreen(loginscreen)
 //    'edit funds'? (maybe edit user info?)
+//
+// Stocks Page
+//   buy form: update buy button. Show user money. Show maximum possible purchase.
 
 
 function renderUser(user){
@@ -98,6 +104,10 @@ function handleSubmit(e){
 
 
 function renderCompanies(companies){
+  clearDOM()
+  renderNavbar()
+  let div = document.createElement('div')
+  div.className = 'ui grid container'
   let table = document.createElement('table')
   table.className = "ui celled striped table"
   let thead = document.createElement('thead')
@@ -108,7 +118,8 @@ function renderCompanies(companies){
   th2.innerText = 'Daily Info'
   let tbody = document.createElement('tbody')
 
-  document.querySelector('body').appendChild(table)
+  document.querySelector('body').appendChild(div)
+  div.appendChild(table)
   table.appendChild(thead)
   thead.appendChild(tr)
   tr.appendChild(th1)
@@ -176,15 +187,178 @@ function fetchStock(symbol){
 
 function renderStock(quote){
   renderNavbar()
-  let symbol = quote["01. symbol"]
-  let open = quote["02. open"]
-  let high = quote["03. high"]
-  let low = quote["04. low"]
-  let price = quote["05. price"]
-  let volume = quote["06. volume"]
-  let day = quote["07. latest trading day"]
-  let close = quote["08. previous close"]
-  let change = quote["09. change"]
-  let changePercent = quote["10. change percent"]  //these values are strings!
+  const symbol = quote["01. symbol"]
+  const open = quote["02. open"]
+  const high = quote["03. high"]
+  const low = quote["04. low"]
+  const price = quote["05. price"]
+  const volume = quote["06. volume"]
+  const day = quote["07. latest trading day"]
+  const close = quote["08. previous close"]
+  const change = quote["09. change"]
+  const percent = quote["10. change percent"]  //these values are strings!
 
+  let table = document.createElement('table')
+  table.className = "ui celled table"
+  let thead = document.createElement('thead')
+  let tr = document.createElement('tr')
+  let th1 = document.createElement('th')
+  th1.innerText = symbol
+  let th2 = document.createElement('th')
+  th2.innerText = 'Value'
+  let tbody = document.createElement('tbody')
+
+  document.querySelector('body').appendChild(table)
+  table.appendChild(thead)
+  thead.appendChild(tr)
+  tr.appendChild(th1)
+  tr.appendChild(th2)
+  table.appendChild(tbody)
+
+  let trOpen = document.createElement('tr')
+  let tdOpen1 = document.createElement('td')
+  tdOpen1.innerText = "Open"
+  let tdOpen2 = document.createElement('td')
+  tdOpen2.innerText = open
+  tbody.appendChild(trOpen)
+  trOpen.appendChild(tdOpen1)
+  trOpen.appendChild(tdOpen2)
+
+  let trHigh = document.createElement('tr')
+  let tdHigh1 = document.createElement('td')
+  tdHigh1.innerText = "High"
+  let tdHigh2 = document.createElement('td')
+  tdHigh2.innerText = high
+  tbody.appendChild(trHigh)
+  trHigh.appendChild(tdHigh1)
+  trHigh.appendChild(tdHigh2)
+
+  let trLow = document.createElement('tr')
+  let tdLow1 = document.createElement('td')
+  tdLow1.innerText = "Low"
+  let tdLow2 = document.createElement('td')
+  tdLow2.innerText = low
+  tbody.appendChild(trLow)
+  trLow.appendChild(tdLow1)
+  trLow.appendChild(tdLow2)
+
+  let trPrice = document.createElement('tr')
+  let tdPrice1 = document.createElement('td')
+  tdPrice1.innerText = "Price"
+  let tdPrice2 = document.createElement('td')
+  tdPrice2.innerText = price
+  tbody.appendChild(trPrice)
+  trPrice.appendChild(tdPrice1)
+  trPrice.appendChild(tdPrice2)
+
+  let trVolume = document.createElement('tr')
+  let tdVolume1 = document.createElement('td')
+  tdVolume1.innerText = "Volume"
+  let tdVolume2 = document.createElement('td')
+  tdVolume2.innerText = volume
+  tbody.appendChild(trVolume)
+  trVolume.appendChild(tdVolume1)
+  trVolume.appendChild(tdVolume2)
+
+  let trDay = document.createElement('tr')
+  let tdDay1 = document.createElement('td')
+  tdDay1.innerText = "Latest Trading Day"
+  let tdDay2 = document.createElement('td')
+  tdDay2.innerText = day
+  tbody.appendChild(trDay)
+  trDay.appendChild(tdDay1)
+  trDay.appendChild(tdDay2)
+
+  let trClose = document.createElement('tr')
+  let tdClose1 = document.createElement('td')
+  tdClose1.innerText = "Previous Close"
+  let tdClose2 = document.createElement('td')
+  tdClose2.innerText = close
+  tbody.appendChild(trClose)
+  trClose.appendChild(tdClose1)
+  trClose.appendChild(tdClose2)
+
+  let trChange = document.createElement('tr')
+  let tdChange1 = document.createElement('td')
+  tdChange1.innerText = "Change"
+  let tdChange2 = document.createElement('td')
+  tdChange2.innerText = change
+  change[0] == "-" ? tdChange2.className = 'negative' : tdChange2.className = 'positive'
+  tbody.appendChild(trChange)
+  trChange.appendChild(tdChange1)
+  trChange.appendChild(tdChange2)
+
+  let trPercent = document.createElement('tr')
+  let tdPercent1 = document.createElement('td')
+  tdPercent1.innerText = "Change Percent"
+  let tdPercent2 = document.createElement('td')
+  tdPercent2.innerText = percent
+  percent[0] == "-" ? tdPercent2.className = 'negative' : tdPercent2.className = 'positive'
+  tbody.appendChild(trPercent)
+  trPercent.appendChild(tdPercent1)
+  trPercent.appendChild(tdPercent2)
+
+  let buy = document.createElement('button')
+  buy.className = 'ui button'
+  buy.innerText = 'Buy'
+  buy.addEventListener('click', buyForm)
+
+  document.querySelector('body').appendChild(buy)
+
+
+  let buyDiv = document.createElement('div')    //update buy button.
+  buyDiv.id = 'buyDiv'                          //Show user money.
+  buyDiv.style.display = 'none'                 //Show maximum possible purchase.
+  let form = document.createElement('form')
+  form.className = 'ui small form'
+  form.addEventListener('submit', buySubmit)
+  let field = document.createElement('field')
+  let label = document.createElement('label')
+  label.innerText = "Enter Quantity Of Shares To Buy"
+  let input = document.createElement('input')
+  input.type = 'text'
+  input.name = 'input'
+  input.price = `${price}`
+  input.symbol = `${symbol}`
+  let submit = document.createElement('button')
+  submit.className = 'ui button'
+  submit.type = submit
+  submit.innerText = 'Purchase'
+
+  document.querySelector('body').appendChild(buyDiv)
+  buyDiv.appendChild(form)
+  form.appendChild(field)
+  form.appendChild(label)
+  form.appendChild(input)
+  form.appendChild(submit)
+}
+
+function buyForm(){
+  form = document.querySelector("#buyDiv")
+  form.style = ""
+}
+
+function buySubmit(e){
+  e.preventDefault()
+  let quantity = e.target.input.value
+  let price = e.target.input.price
+  let symbol = e.target.input.symbol
+
+  for(let i = 0; i < quantity; i++){
+    postShares(symbol, price)
+  }
+}
+
+function postShares(symbol, price){
+  fetch(sharesURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: userID,
+            stock_symbol: symbol,
+            purchase_value: price
+        })
+  })
 }
