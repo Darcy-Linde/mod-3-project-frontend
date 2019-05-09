@@ -41,6 +41,7 @@ function renderNavbar(){
   let history = document.createElement('a')
   history.className = 'ui item'
   history.innerText = 'Transaction History'
+  history.addEventListener('click', fetchTransactions)
 
   // Transaction History
   let portfolio = document.createElement('a')
@@ -413,5 +414,71 @@ function editMoney(newMoney){
         body: JSON.stringify({
             money: newMoney
         })
+  })
+}
+
+function fetchTransactions(){
+  fetch(transactionsURL)
+  .then((res) => res.json())
+  .then((data) =>renderTransactions(data))
+}
+
+
+function renderTransactions(data){
+  clearDOM()
+  renderNavbar()
+  let div = document.createElement('div')
+  div.className = 'ui grid container'
+  let table = document.createElement('table')
+  table.className = "ui celled striped table"
+  let thead = document.createElement('thead')
+  let tr = document.createElement('tr')
+  let th1 = document.createElement('th')
+  th1.innerText = 'Stock Symbol'
+  let th2 = document.createElement('th')
+  th2.innerText = 'Transaction'
+  let th3 = document.createElement('th')
+  th3.innerText = 'Quantity'
+  let th4 = document.createElement('th')
+  th4.innerText = 'Individual Stock Price'
+  let th5 = document.createElement('th')
+  th5.innerText = 'Total Transaction Value'
+
+  let tbody = document.createElement('tbody')
+
+  document.querySelector('body').appendChild(div)
+  div.appendChild(table)
+  table.appendChild(thead)
+  thead.appendChild(tr)
+  tr.appendChild(th1)
+  tr.appendChild(th2)
+  tr.appendChild(th3)
+  tr.appendChild(th4)
+  tr.appendChild(th5)
+  table.appendChild(tbody)
+
+  data.forEach(transaction =>{
+    //create conditional table
+    if (transaction["user_id"] == userID){
+      let tr = document.createElement('tr')
+      let td1 = document.createElement('td')
+      td1.innerText = transaction["stock_symbol"]
+      let td2 = document.createElement('td')
+      transaction["bought"] == true ? td2.innerText = 'Bought' : td2.innerText = 'Sold'
+      let td3 = document.createElement('td')
+      td3.innerText = transaction["quantity"]
+      let td4 = document.createElement('td')
+      td4.innerText = transaction["stock_price"]
+      let td5 = document.createElement('td')
+      td5.innerText = transaction["transaction_total"]
+
+      //append all elements to table
+      tbody.appendChild(tr)
+      tr.appendChild(td1)
+      tr.appendChild(td2)
+      tr.appendChild(td3)
+      tr.appendChild(td4)
+      tr.appendChild(td5)
+    }
   })
 }
