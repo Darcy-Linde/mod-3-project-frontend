@@ -124,8 +124,8 @@ function renderCompanies(companies){
       let td = document.createElement('td')
       td.className = 'collapsing'
       let h4 = document.createElement('h4')
-      let content = document.createElement('div')
-      content.className = 'content'
+      let content = document.createElement('button')
+      content.className = 'ui button'
       content.addEventListener('click', stockClick)
       content.id = symbol
       content.innerText = symbol
@@ -142,7 +142,7 @@ function renderCompanies(companies){
       tr.appendChild(td2)
       td.appendChild(h4)
       h4.appendChild(content)
-      content.appendChild(subHeader)
+      h4.appendChild(subHeader)
 
     })
 
@@ -175,14 +175,16 @@ function fetchStock(symbol){
 }
 
 function renderStock(quote){
+  renderNavbar()
   let symbol = quote["01. symbol"]
+  let open = quote["02. open"]
+  let high = quote["03. high"]
+  let low = quote["04. low"]
   let price = quote["05. price"]
   let volume = quote["06. volume"]
+  let day = quote["07. latest trading day"]
+  let close = quote["08. previous close"]
   let change = quote["09. change"]
   let changePercent = quote["10. change percent"]  //these values are strings!
-  console.log(symbol)
-  console.log(price)
-  console.log(volume)
-  console.log(change)
-  console.log(changePercent)
+
 }
