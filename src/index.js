@@ -29,10 +29,6 @@ function clearDOM(){
   body.innerHTML = ""
 }
 
-function fetchCompanyImage(name){
-  return fetch(`https://api.ritekit.com/v1/images/logo?domain=${name}.com&client_id=97247b685aef64f97affbc136bc97d444e5c50af51c3`)
-}
-
 function renderNavbar(){
   let menu = document.createElement('div')
   menu.className = 'ui secondary menu'
@@ -47,6 +43,7 @@ function renderNavbar(){
   let portfolio = document.createElement('a')
   portfolio.className = 'ui item'
   portfolio.innerText = 'My Portfolio'
+  portfolio.addEventListener('click', fetchPortfolio)
 
   // searchbar (remove form and reinstate search icon)
   let menuSearch = document.createElement('div')
@@ -87,9 +84,7 @@ function renderNavbar(){
 //
 // User HomePage:
 //    Items on Navbar:
-//    'Transaction History' - Purchase/Sale history in table.
-//        purchase shows stock name, quantity, stock price, and total purchase cost
-//        sale shows stock name, quantity, stock price, net gain on purchase/sale?
+
 //    'My Portfolio' - Table of stocks user has invested in
 //        show total portfolio value
 //        table values: stock name/symbol(clickable), quantity owned, current stock value/total value
@@ -364,7 +359,6 @@ function buySubmit(e){
   let total = quantity * price
 
   let newMoney = currentMoney - total
-  console.log(newMoney)
   for(let i = 0; i < quantity; i++){
     postShares(symbol, price)
   }
@@ -372,6 +366,7 @@ function buySubmit(e){
   postBuyTransaction(symbol, price, quantity, total)
   editMoney(newMoney)
   currentMoney = getMoney()
+  fetchTransactions()
 }
 
 function postShares(symbol, price){
@@ -480,5 +475,106 @@ function renderTransactions(data){
       tr.appendChild(td4)
       tr.appendChild(td5)
     }
+  })
+}
+
+function fetchPortfolio(){
+  fetch(sharesURL)
+  .then((res) => res.json())
+  .then((portfolioData) =>createObj(portfolioData))
+}
+
+function createObj(portfolioData){
+  let userObj = {}
+  portfolioData.forEach(share=>{
+    if (share["user_id"] == userID){
+      let symbol = share["stock_symbol"]
+      symbol in userObj ? userObj[symbol][0] += 1 : userObj[symbol] = [1, 0]
+    }
+  })
+
+  Promise.all(fetchCurrentPrices(userObj)).then(dataArray => renderPortfolio(dataArray, userObj))
+
+  //renderPortfolio(userObj)
+}
+
+function fetchCurrentPrices(userObj){
+  const fetchArray = Object.keys(userObj).map(key =>{
+    let stockURL = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${key}&apikey=T8E6RZ7YEO1NDYZU`
+
+    return fetch(stockURL)
+    .then((res) => res.json())
+    //.then((data) => userObj[key][1] = (data["Global Quote"]["05. price"]))
+  })
+  return fetchArray
+}
+
+
+function renderPortfolio(dataArray, userObj){
+  let newObj = {}
+  dataArray.forEach(obj=>{
+    console.log(obj)
+    newObj[obj["Global Quote"]["01. symbol"]] = obj["Global Quote"]["05. price"]
+  })
+  console.log(newObj)
+
+  Object.keys(newObj).forEach(key=>{
+    userObj[key][1] = newObj[key]
+  })
+
+  clearDOM()
+  renderNavbar()
+
+  let div = document.createElement('div')
+  div.className = 'ui grid container'
+  let table = document.createElement('table')
+  table.className = "ui celled striped table"
+  let thead = document.createElement('thead')
+  let tr = document.createElement('tr')
+  let th1 = document.createElement('th')
+  th1.innerText = 'Stock Symbol'
+  let th2 = document.createElement('th')
+  th2.innerText = 'Quantity Owned'
+  let th3 = document.createElement('th')
+  th3.innerText = 'Current Individual Share Value'
+  let th4 = document.createElement('th')
+  th4.innerText = 'Current Total Market Value'
+  let th5 = document.createElement('th')
+
+  let tbody = document.createElement('tbody')
+
+  document.querySelector('body').appendChild(div)
+  div.appendChild(table)
+  table.appendChild(thead)
+  thead.appendChild(tr)
+  tr.appendChild(th1)
+  tr.appendChild(th2)
+  tr.appendChild(th3)
+  tr.appendChild(th4)
+  tr.appendChild(th5)
+  table.appendChild(tbody)
+
+  Object.keys(userObj).forEach(key=>{
+    let tr = document.createElement('tr')
+    let td1 = document.createElement('td')
+    td1.innerText = key
+    let td2 = document.createElement('td')
+    td2.innerText = userObj[key][0]
+    let td3 = document.createElement('td')
+    console.log(userObj[key][1])
+    td3.innerText = userObj[key][1]
+    let td4 = document.createElement('td')
+    td4.innerText = userObj[key][0] * userObj[key][1]
+    let td5 = document.createElement('td')
+    let button = document.createElement('button')
+    button.innerText = 'test'
+    td5.appendChild(button)
+
+    tbody.appendChild(tr)
+    tr.appendChild(td1)
+    tr.appendChild(td2)
+    tr.appendChild(td3)
+    tr.appendChild(td4)
+    tr.appendChild(td5)
   })
 }
