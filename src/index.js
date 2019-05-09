@@ -1,8 +1,24 @@
 const usersURL = 'http://localhost:3000/users'
 const sharesURL = 'http://localhost:3000/shares'
-// const userURL = `http://localhost:3000/user/${id}`
+const transactionsURL = 'http://localhost:3000/transactions'
 let user = 'test_1'
 let userID = 1
+let userURL = `http://localhost:3000/users/${userID}`
+let currentMoney = getMoney()
+
+
+function getMoney(){
+  let request = new XMLHttpRequest();
+    request.open('GET', userURL, false);  // `false` makes the request synchronous
+    request.send();
+
+    if (request.status === 200) {
+      return JSON.parse(request.responseText).money;
+    }
+  // return fetch(userURL)
+  // .then((res) => res.json())
+  // .then((data) => data)
+}
 
 document.addEventListener('DOMContentLoaded', () => {
   renderUser()
@@ -70,19 +86,17 @@ function renderNavbar(){
 //
 // User HomePage:
 //    Items on Navbar:
-//    'Transaction History' - Purchase/Sale history in table with 20 cells.
+//    'Transaction History' - Purchase/Sale history in table.
 //        purchase shows stock name, quantity, stock price, and total purchase cost
 //        sale shows stock name, quantity, stock price, net gain on purchase/sale?
 //    'My Portfolio' - Table of stocks user has invested in
 //        show total portfolio value
 //        table values: stock name/symbol(clickable), quantity owned, current stock value/total value
 //        show graph of portfolio history? (How are we keeping track of history?)
-//    'Search Bar' - Renders table of results with name,symbol,...
+//
 //    'Logout' - erases current user and rerenders app homescreen(loginscreen)
 //    'edit funds'? (maybe edit user info?)
 //
-// Stocks Page
-//   buy form: update buy button. Show user money. Show maximum possible purchase.
 
 
 function renderUser(user){
@@ -305,21 +319,23 @@ function renderStock(quote){
 
   document.querySelector('body').appendChild(buy)
 
+  let maxPurchase = Math.floor(currentMoney / price)
 
-  let buyDiv = document.createElement('div')    //update buy button.
-  buyDiv.id = 'buyDiv'                          //Show user money.
-  buyDiv.style.display = 'none'                 //Show maximum possible purchase.
+  let buyDiv = document.createElement('div')
+  buyDiv.id = 'buyDiv'
+  buyDiv.style.display = 'none'
   let form = document.createElement('form')
   form.className = 'ui small form'
   form.addEventListener('submit', buySubmit)
   let field = document.createElement('field')
   let label = document.createElement('label')
-  label.innerText = "Enter Quantity Of Shares To Buy"
+  label.innerText = `Enter Quantity Of Shares To Buy. User Has $${currentMoney}. Maximum possible purchase is ${maxPurchase} shares.`
   let input = document.createElement('input')
   input.type = 'text'
   input.name = 'input'
   input.price = `${price}`
   input.symbol = `${symbol}`
+  input.money = `${currentMoney}`
   let submit = document.createElement('button')
   submit.className = 'ui button'
   submit.type = submit
@@ -343,10 +359,18 @@ function buySubmit(e){
   let quantity = e.target.input.value
   let price = e.target.input.price
   let symbol = e.target.input.symbol
+  let currentMoney = e.target.input.money
+  let total = quantity * price
 
+  let newMoney = currentMoney - total
+  console.log(newMoney)
   for(let i = 0; i < quantity; i++){
     postShares(symbol, price)
   }
+
+  postBuyTransaction(symbol, price, quantity, total)
+  editMoney(newMoney)
+  currentMoney = getMoney()
 }
 
 function postShares(symbol, price){
@@ -359,6 +383,35 @@ function postShares(symbol, price){
             user_id: userID,
             stock_symbol: symbol,
             purchase_value: price
+        })
+  })
+}
+
+function postBuyTransaction(symbol, price, quantity, total){
+  fetch(transactionsURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: userID,
+            bought: true,
+            stock_symbol: symbol,
+            stock_price: price,
+            quantity: quantity,
+            transaction_total: total
+        })
+  })
+}
+
+function editMoney(newMoney){
+  fetch(userURL, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            money: newMoney
         })
   })
 }
