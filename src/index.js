@@ -53,8 +53,9 @@ function renderNavbar(){
   input.type = "text"
   input.name = 'input'
   input.placeholder = 'Search Companies...'
-  let i = document.createElement('input')
-  i.className = 'search link icon'
+  let i = document.createElement('button')
+  i.className = 'ui button'
+  i.innerText = 'Submit'
   i.type = 'submit'
   form.addEventListener('submit', handleSubmit)
 
@@ -85,13 +86,8 @@ function renderNavbar(){
 // User HomePage:
 //    Items on Navbar:
 
-//    'My Portfolio' - Table of stocks user has invested in
-//        show total portfolio value
-//        table values: stock name/symbol(clickable), quantity owned, current stock value/total value
-//        show graph of portfolio history? (How are we keeping track of history?)
 //
-//    'Logout' - erases current user and rerenders app homescreen(loginscreen)
-//    'edit funds'? (maybe edit user info?)
+
 //
 
 
@@ -155,7 +151,7 @@ function renderCompanies(companies){
       subHeader.innerText = name
 
       let td2 = document.createElement('td')
-      td2.innerText = '22'
+      td2.innerText = ''
 
       //append all elements to table
       tbody.appendChild(tr)
@@ -513,10 +509,8 @@ function fetchCurrentPrices(userObj){
 function renderPortfolio(dataArray, userObj){
   let newObj = {}
   dataArray.forEach(obj=>{
-    console.log(obj)
     newObj[obj["Global Quote"]["01. symbol"]] = obj["Global Quote"]["05. price"]
   })
-  console.log(newObj)
 
   Object.keys(newObj).forEach(key=>{
     userObj[key][1] = newObj[key]
@@ -561,13 +555,17 @@ function renderPortfolio(dataArray, userObj){
     let td2 = document.createElement('td')
     td2.innerText = userObj[key][0]
     let td3 = document.createElement('td')
-    console.log(userObj[key][1])
     td3.innerText = userObj[key][1]
     let td4 = document.createElement('td')
     td4.innerText = userObj[key][0] * userObj[key][1]
     let td5 = document.createElement('td')
     let button = document.createElement('button')
-    button.innerText = 'test'
+    button.className = 'ui button'
+    button.innerText = 'Sell This Stock'
+    button.symbol = key
+    button.quantity = userObj[key][0]
+    button.price = userObj[key][1]
+    button.addEventListener('click', sellForm)
     td5.appendChild(button)
 
     tbody.appendChild(tr)
@@ -576,5 +574,104 @@ function renderPortfolio(dataArray, userObj){
     tr.appendChild(td3)
     tr.appendChild(td4)
     tr.appendChild(td5)
+  })
+
+  let sellDiv = document.createElement('div')
+  sellDiv.id = 'sellDiv'
+  sellDiv.className = 'ui grid container'
+  document.querySelector('body').appendChild(sellDiv)
+}
+
+function sellForm(e){
+  let symbol = e.target.symbol
+  let quantity = e.target.quantity
+  let price = e.target.price
+
+  let form = document.createElement('form')
+  form.className = 'ui small form'
+  form.addEventListener('submit', sellSubmit)
+  let label = document.createElement('label')
+  label.for = 'select'
+  label.innerText = `Select Quantity Of ${symbol} Shares To Sell`
+  let select = document.createElement('select')
+  select.name = 'select'
+  select.id = 'select'
+  select.price = price
+  select.symbol = symbol
+  for(let i = 1; i <= quantity; i++){
+    let option = document.createElement('option')
+    option.value = `${i}`
+    option.innerText = i
+    select.appendChild(option)
+  }
+  let submit = document.createElement('button')
+  submit.className = 'ui button'
+  submit.type = submit
+  submit.innerText = 'Sell'
+
+  form.appendChild(label)
+  form.appendChild(select)
+  form.appendChild(submit)
+
+  sell = document.querySelector('#sellDiv')
+  sell.innerHTML = ""
+  sell.appendChild(form)
+}
+
+function sellSubmit(e){
+  e.preventDefault()
+  let quantity = parseInt(e.target.select.value)
+  let price = e.target.select.price
+  let symbol = e.target.select.symbol
+  let total = quantity * price
+  let newMoney = currentMoney + total
+
+  getSharesToDelete(symbol, quantity)
+  postSellTransaction(symbol, price, quantity, total)
+  editMoney(newMoney)
+  currentMoney = getMoney()
+  fetchTransactions()
+}
+
+function getSharesToDelete(symbol,quantity){
+  fetch(sharesURL)
+  .then((res) => res.json())
+  .then((sharesData) => parseShares(sharesData, symbol, quantity))
+}
+
+function parseShares(sharesData, symbol, quantity){
+  const sharesArray = []
+  sharesData.forEach(share =>{
+    if (share.user_id == userID && share.stock_symbol == symbol){
+      sharesArray.push(share.id)
+    }
+  })
+  const newArray = sharesArray.slice(0,quantity)
+  deleteShares(newArray)
+}
+
+function deleteShares(newArray){
+  newArray.forEach(share=>{
+    let shareUrl = `http://localhost:3000/shares/${share}`
+    fetch(shareUrl,{
+      method: 'DELETE'
+    })
+  })
+}
+
+function postSellTransaction(symbol, price, quantity, total){
+  fetch(transactionsURL, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+            user_id: userID,
+            bought: false,
+            stock_symbol: symbol,
+            stock_price: price,
+            quantity: quantity,
+            transaction_total: total
+        })
   })
 }
